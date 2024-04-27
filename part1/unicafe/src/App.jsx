@@ -6,6 +6,10 @@ function App() {
   const [bad, setBad] = useState(0)
   
   const Statistics = ({good, neutral, bad}) => {
+    if(good+neutral+bad === 0){
+      return 'No feedback given'
+    }
+    
     return (
     <>
       <p>all {good + neutral + bad}</p>
