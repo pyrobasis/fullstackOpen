@@ -5,17 +5,27 @@ function App() {
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
   
+  const StatisticLine = ({value, text}) => {
+    return <p>{text} {value}</p>
+  }
+
   const Statistics = ({good, neutral, bad}) => {
+    <h1>statistics</h1>
+
     if(good+neutral+bad === 0){
-      return 'No feedback given'
+      return <><p>No feedback given</p></>
     }
     
     return (
-    <>
-      <p>all {good + neutral + bad}</p>
-      <p>average {(good-bad)/(good+neutral+bad)}</p>
-      <p>positive {(good)/(good+neutral+bad) * 100 } %</p>
-    </>)    
+      <>
+        <StatisticLine text="good" value={good} />
+        <StatisticLine text="neutral" value={neutral} />
+        <StatisticLine text="bad" value={bad} />
+        <StatisticLine text="all" value={good + neutral + bad} />
+        <StatisticLine text="average" value={(good-bad)/(good+neutral+bad)} />
+        <StatisticLine text="positive" value={(good)/(good+neutral+bad) * 100 + '%'} />
+      </>
+    )    
   }
 
   const Button = (props) => {
@@ -28,10 +38,6 @@ function App() {
       <Button handleClick={() => setGood(good + 1)} text='Good' />
       <Button handleClick={() => setNeutral(neutral + 1)} text='Neutral' />
       <Button handleClick={() => setBad(bad + 1)} text='Bad' />
-      <h1>statistics</h1>
-      <p>good {good}</p>
-      <p>neutral {neutral}</p>
-      <p>bad {bad}</p>
       <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   )
