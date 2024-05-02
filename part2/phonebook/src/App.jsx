@@ -40,15 +40,17 @@ const InputPerson = ({props, handler}) => {
   }
 
   const submitPerson = (event) => {
-    event.preventDefault()    
-
-    const checker = props.some(p => p.name === newName)
+    event.preventDefault()
     
+    const checker = props.some(p => p.name === newName)
+
     if(checker){
       alert(`${newName} is already added to phonebook`)
     } else {
-      const newPerson = { name : newName, number : newNumber, id : props.length + 1 }  
-      handler(props.concat(newPerson))
+      const newPerson = { name : newName, number : newNumber, id : `${props.length + 1}` }  
+      axios
+      .post('http://localhost:3001/persons', newPerson)
+      .then((response) => handler(props.concat(response.data)))
     }
 
     setNewName('')
