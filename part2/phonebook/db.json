@@ -21,19 +21,24 @@
       "id": "4"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Paul Atreides",
       "number": "432-29382-11"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "John Cena",
       "number": "322-11-2"
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "Michael Scott",
       "number": "24201-4223"
+    },
+    {
+      "id": "8",
+      "name": "Lauren Mayberry",
+      "number": "3491-1232-11"
     }
   ]
 }
