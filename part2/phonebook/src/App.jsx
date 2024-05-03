@@ -47,19 +47,24 @@ const InputPerson = ({props, handler}) => {
   const submitPerson = (event) => {
     event.preventDefault()
     
-    const checker = props.some(p => p.name === newName)
+    const checker = props.find(p => p.name === newName ? p.id : false)
 
     if(checker){
-      alert(`${newName} is already added to phonebook`)
+      if(window.confirm(`${newName} is already added to phonebook. Do you want to update their phone number?`)){
+        const updatedPerson = { ...checker, number : newNumber }
+        personServices.update(checker.id, updatedPerson).then(response => {
+          handler(props.map(person => person.id !== checker.id ? person : response))
+        })
+      }
     } else {
       const newPerson = { name : newName, number : newNumber, id : `${props.length + 1}` }
-
       personServices.create(newPerson).then((response) => handler(props.concat(response)))
     }
 
     setNewName('')
     setNewNumber('')
   }
+
 
   return (
   <form onSubmit={submitPerson}>
