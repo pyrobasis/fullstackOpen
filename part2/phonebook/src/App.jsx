@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import personServices from './services/persons'
+import Entry from './components/Entry'
 
 const Filter = ({setFilterWord}) => {
   const [newSearch, setNewSearch] = useState('')
@@ -15,15 +15,19 @@ const Filter = ({setFilterWord}) => {
   )
 }
 
-const Entries = ({persons, filter}) => {
-  
+const Entries = ({persons, filter, personsSetter}) => {
+  console.log(persons)
   const filteredPersons = persons.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()))
   
+  const handleDeleteButton = async (id) => {
+    const person = persons.find(p => p.id === id)
+    if(window.confirm(`Delete ${person.name}?`))
+      personsSetter(await personServices.remove(id).then(() => personServices.getAll().then(result => result)))
+  }
+
   return (
     <ul>
-      {filteredPersons.map(p => {
-        return <li key={p.id}>{p.name} {p.number}</li>
-      })}
+      <Entry persons={filteredPersons} clickHandler={handleDeleteButton} />
     </ul>
   )
 }
@@ -87,7 +91,7 @@ const App = () => {
       <h2>add a new person</h2>
       <InputPerson props={persons} handler={setPersons} />
       <h2>Numbers</h2>
-      <Entries persons={persons} filter={filterWord} />
+      <Entries persons={persons} filter={filterWord} personsSetter={setPersons} />
     </div>
   )
 }
