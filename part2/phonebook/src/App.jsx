@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import personServices from './services/persons'
 import Entry from './components/Entry'
+import './index.css'
 
 const Filter = ({setFilterWord}) => {
   const [newSearch, setNewSearch] = useState('')
@@ -15,7 +16,7 @@ const Filter = ({setFilterWord}) => {
   )
 }
 
-const Entries = ({persons, filter, personsSetter}) => {
+const Entries = ({persons, filter, personsSetter }) => {
   console.log(persons)
   const filteredPersons = persons.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()))
   
@@ -32,7 +33,7 @@ const Entries = ({persons, filter, personsSetter}) => {
   )
 }
 
-const InputPerson = ({props, handler}) => {
+const InputPerson = ({props, handler, errormsgSetter}) => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
 
@@ -54,15 +55,25 @@ const InputPerson = ({props, handler}) => {
         const updatedPerson = { ...checker, number : newNumber }
         personServices.update(checker.id, updatedPerson).then(response => {
           handler(props.map(person => person.id !== checker.id ? person : response))
+
+          errormsgSetter(`Updated ${checker.name}'s number`)
+          setTimeout(() => {
+            errormsgSetter(null)
+          }, 5000);
         })
       }
     } else {
       const newPerson = { name : newName, number : newNumber, id : `${props.length + 1}` }
       personServices.create(newPerson).then((response) => handler(props.concat(response)))
+      errormsgSetter(`Added ${newName}`)
+      setTimeout(() => {
+        errormsgSetter(null)
+      }, 5000);
     }
 
     setNewName('')
     setNewNumber('')
+
   }
 
 
@@ -80,9 +91,18 @@ const InputPerson = ({props, handler}) => {
   </form>)
 }
 
+const Notification = ({message}) => {
+  return (
+    <div className='error'>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [filterWord, setFilterWord] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     console.log('effect');
@@ -92,9 +112,10 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errorMessage} />
       <Filter setFilterWord={setFilterWord}/>
       <h2>add a new person</h2>
-      <InputPerson props={persons} handler={setPersons} />
+      <InputPerson props={persons} handler={setPersons} errormsgSetter={setErrorMessage} />
       <h2>Numbers</h2>
       <Entries persons={persons} filter={filterWord} personsSetter={setPersons} />
     </div>
