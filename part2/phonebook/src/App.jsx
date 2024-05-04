@@ -33,7 +33,7 @@ const Entries = ({persons, filter, personsSetter }) => {
   )
 }
 
-const InputPerson = ({props, handler, errormsgSetter}) => {
+const InputPerson = ({props, setPersons, errormsgSetter, notificationStyle, setNotificationStyle}) => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
 
@@ -54,17 +54,28 @@ const InputPerson = ({props, handler, errormsgSetter}) => {
       if(window.confirm(`${newName} is already added to phonebook. Do you want to update their phone number?`)){
         const updatedPerson = { ...checker, number : newNumber }
         personServices.update(checker.id, updatedPerson).then(response => {
-          handler(props.map(person => person.id !== checker.id ? person : response))
+          setPersons(props.map(person => person.id !== checker.id ? person : response))
 
           errormsgSetter(`Updated ${checker.name}'s number`)
+          setNotificationStyle({...notificationStyle, display:'block'})
           setTimeout(() => {
+            setNotificationStyle({...notificationStyle, display:'none'})
+          }, 5000);
+        }).catch(error => {
+          const originalNotificationStyle = {...notificationStyle}
+          errormsgSetter(`${checker.name} has already been removed from the server.`)
+          setNotificationStyle({...notificationStyle, display:'block', color:'red'})
+
+          setTimeout(() => {
+            setNotificationStyle(originalNotificationStyle)
             errormsgSetter(null)
           }, 5000);
+          setPersons(props.filter(person => person.id !== checker.id))
         })
       }
     } else {
       const newPerson = { name : newName, number : newNumber, id : `${props.length + 1}` }
-      personServices.create(newPerson).then((response) => handler(props.concat(response)))
+      personServices.create(newPerson).then((response) => setPersons(props.concat(response)))
       errormsgSetter(`Added ${newName}`)
       setTimeout(() => {
         errormsgSetter(null)
@@ -91,9 +102,9 @@ const InputPerson = ({props, handler, errormsgSetter}) => {
   </form>)
 }
 
-const Notification = ({message}) => {
+const Notification = ({message, notificationStyle}) => {
   return (
-    <div className='error'>
+    <div style={notificationStyle}>
       {message}
     </div>
   )
@@ -103,19 +114,29 @@ const App = () => {
   const [persons, setPersons] = useState([])
   const [filterWord, setFilterWord] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
+  const [notificationStyle, setNotificationStyle] = useState({
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px',
+    display: 'none'
+})
 
   useEffect(() => {
-    console.log('effect');
+    console.log('effect'),
     personServices.getAll().then((response) => setPersons(response))
   }, [])
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={errorMessage} />
+      <Notification message={errorMessage} notificationStyle={notificationStyle} />
       <Filter setFilterWord={setFilterWord}/>
       <h2>add a new person</h2>
-      <InputPerson props={persons} handler={setPersons} errormsgSetter={setErrorMessage} />
+      <InputPerson props={persons} setPersons={setPersons} errormsgSetter={setErrorMessage} notificationStyle={notificationStyle} setNotificationStyle={setNotificationStyle} />
       <h2>Numbers</h2>
       <Entries persons={persons} filter={filterWord} personsSetter={setPersons} />
     </div>
