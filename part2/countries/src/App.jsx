@@ -1,5 +1,30 @@
 import { useState, useEffect } from 'react'
 import countryServices from './services/country.js'
+import axios from 'axios'
+
+
+const Weather = ({country}) => {
+  const [weatherData, setWeatherData] = useState(null)
+  const api_key = import.meta.env.VITE_SOME_KEY
+  const baseUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${api_key}&q=`
+  const cityQuery = `${country.capital[0]},${country.cca2}`
+  useEffect(() => {
+    async function fetch() {
+      await axios.get(baseUrl + cityQuery).then(res => setWeatherData(res.data));
+    }
+    fetch();
+  }, [])
+
+  if(weatherData){
+    return (
+    <div>
+      <h2>{`Weather in ${country.capital[0]}`}</h2>
+      <p>Temperature: {weatherData.main.temp} ℃</p>
+      <img src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}></img>
+      <p>Wind: {weatherData.wind.speed} m/s</p>
+    </div>)
+  }
+}
 
 const CountryDetail = ({country}) => {
   const countryLanguages = []
@@ -17,12 +42,14 @@ const CountryDetail = ({country}) => {
             {countryLanguages}
           </ul>
           <img src={country.flags.png} />
+          <Weather country={country} />
         </div>
   </>)
 }
 
-const SearchResult = ({countries, countryName, setAllCountryList}) => {
+const SearchResult = ({countries, countryName, setAllCountryList, setCountryName}) => {
   const [countryNum, setCountryNum] = useState(null)
+  useEffect(() => setCountryNum(null), [countryName])
 
   if(countries) {
     const filteredCountries = countries.filter(c => c.name.common.toLowerCase().includes(countryName.toLowerCase()))
@@ -43,7 +70,9 @@ const SearchResult = ({countries, countryName, setAllCountryList}) => {
     if(filteredCountries.length === 1){
         const country = filteredCountries[0]      
       return (
-        <CountryDetail country={country}/>
+        <div>
+          <CountryDetail country={country}/>
+        </div>
       )    
     }
     
@@ -63,7 +92,8 @@ const SearchResult = ({countries, countryName, setAllCountryList}) => {
 function App() {
   const [countryName, setCountryName] = useState('')
   const [allCountryList, setAllCountryList] = useState(null)
-  const typeCountryInput = (e) => setCountryName(e.target.value)
+  const typeCountryInput = (e) => { 
+    setCountryName(e.target.value) }
   
   useEffect(() => {countryServices.getAll().then(res => {
     res.map(r => r.detailToggle = false)
@@ -76,7 +106,7 @@ function App() {
     <div>
       find countries <input value={countryName} onChange={typeCountryInput}></input>
     </div>
-    <SearchResult countries={allCountryList} countryName={countryName} setAllCountryList={setAllCountryList} />
+    <SearchResult countries={allCountryList} countryName={countryName} setAllCountryList={setAllCountryList} setCountryName={setCountryName} />
     </>
   )
 }
